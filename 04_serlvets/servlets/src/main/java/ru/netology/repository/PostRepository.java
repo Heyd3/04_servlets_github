@@ -9,8 +9,8 @@ import java.util.concurrent.atomic.AtomicLong;
 // Stub
 public class PostRepository {
 
-  public Map<Long, Post> posts = new HashMap<>();
-  private long id = 1;
+  public Map<AtomicLong, Post> posts = new ConcurrentHashMap<AtomicLong, Post>();
+  private AtomicLong id = new AtomicLong();
 
   public List<Post> all() {
     return new ArrayList<>(posts.values());
@@ -21,12 +21,12 @@ public class PostRepository {
     return Optional.ofNullable(posts.get(id));
   }
 
-  public synchronized Post save(Post post) {
+  public Post save(Post post) {
 
     if (post.getId() == 0){
       Post newPost = new Post(id, post.getContent());
       posts.put(id, newPost);
-      id++;
+      id.getAndIncrement();
       return newPost;
     }
     var entity = posts.get(post.getId());
@@ -36,7 +36,7 @@ public class PostRepository {
     return entity;
   }
 
-  public synchronized void removeById(long id) {
+  public void removeById(long id) {
     posts.remove(id);
   }
 }
